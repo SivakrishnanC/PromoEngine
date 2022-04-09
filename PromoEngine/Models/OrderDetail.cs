@@ -11,4 +11,5 @@ public class OrderDetail
     public int Id { get; set; }
     public StockKeepingUnit StockKeepingUnit { get; set; }
     public int Quantity { get; set; }
+    public bool IsPromotionApplied { get; set; }
 }

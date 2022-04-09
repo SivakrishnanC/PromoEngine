@@ -17,11 +17,20 @@ public class Engine
         {
             foreach (Promotion promotion in promotions)
             {
-                if (order.OrderDetails.Any())
+                if (promotion.Type == PromotionType.Quantity)
                 {
-                    total += order.OrderDetails.Sum(x => x.Quantity * x.StockKeepingUnit.UnitPrice);
+                    foreach (OrderDetail orderDetail in order.OrderDetails.Where(x => promotion.StockKeepingUnitIds.Contains(x.StockKeepingUnit.Id) && x.IsPromotionApplied == false))
+                    {
+                        if (orderDetail.Quantity >= promotion.Quantity)
+                        {
+                            orderDetail.IsPromotionApplied = true;
+                            total += promotion.Price;
+                        }
+                    }
                 }
             }
+
+            total += order.OrderDetails.Where(x => !x.IsPromotionApplied).Sum(x => x.Quantity * x.StockKeepingUnit.UnitPrice);
         }
         else
         {
