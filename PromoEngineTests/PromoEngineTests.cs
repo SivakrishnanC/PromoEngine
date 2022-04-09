@@ -127,5 +127,52 @@ namespace PromoEngineTests
             invoiceAmount = _engine.CalculateInvoiceAmount(order, new List<Promotion> { promotion1 });
             Assert.Equal(75, invoiceAmount);
         }
+
+        [Fact]
+        public void OrderWithOrderDetails_MultiplePromotionTypeExists_AppliesAll()
+        {
+            Order order = new Order(1, new List<OrderDetail>()
+            {
+
+                new(quantity: 3, new StockKeepingUnit("A", 50)),
+                new(quantity: 5, new StockKeepingUnit("B", 30)),
+                new(quantity: 1, new StockKeepingUnit("C", 20)),
+                new(quantity: 1, new StockKeepingUnit("D", 15))
+            });
+
+            List<Promotion> promotions = new List<Promotion>
+            {
+                new Promotion(1, PromotionType.Quantity, new List<string> {"A"}, 3, 130),
+                new Promotion(2, PromotionType.Quantity, new List<string> {"B"}, 2, 45),
+                new Promotion(3, PromotionType.Combination, new List<string> {"C", "D"}, 1, 30)
+            };
+
+            decimal invoiceAmount = _engine.CalculateInvoiceAmount(order, promotions);
+            Assert.Equal(280, invoiceAmount);
+        }
+
+
+        [Fact]
+        public void OrderWithOrderDetails_MultiplePromotionTypeExists_WithResidualQuantity()
+        {
+            Order order = new Order(1, new List<OrderDetail>()
+            {
+
+                new(quantity: 5, new StockKeepingUnit("A", 50)),
+                new(quantity: 5, new StockKeepingUnit("B", 30)),
+                new(quantity: 2, new StockKeepingUnit("C", 20)),
+                new(quantity: 1, new StockKeepingUnit("D", 15))
+            });
+
+            List<Promotion> promotions = new List<Promotion>
+            {
+                new Promotion(1, PromotionType.Quantity, new List<string> {"A"}, 3, 130),
+                new Promotion(2, PromotionType.Quantity, new List<string> {"B"}, 2, 45),
+                new Promotion(3, PromotionType.Combination, new List<string> {"C", "D"}, 1, 30)
+            };
+
+            decimal invoiceAmount = _engine.CalculateInvoiceAmount(order, promotions);
+            Assert.Equal(400, invoiceAmount);
+        }
     }
 }
