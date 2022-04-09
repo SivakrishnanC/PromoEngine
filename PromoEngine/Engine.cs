@@ -19,12 +19,20 @@ public class Engine
             {
                 if (promotion.Type == PromotionType.Quantity)
                 {
-                    foreach (OrderDetail orderDetail in order.OrderDetails.Where(x => promotion.StockKeepingUnitIds.Contains(x.StockKeepingUnit.Id) && x.IsPromotionApplied == false))
+                    foreach (OrderDetail orderDetail in order.OrderDetails.Where(x => x.IsPromotionApplied == false))
                     {
-                        if (orderDetail.Quantity >= promotion.Quantity)
+                        if (promotion.StockKeepingUnitIds.Contains(orderDetail.StockKeepingUnit.Id) && orderDetail.Quantity >= promotion.Quantity)
                         {
+                            int remainingQuantity = orderDetail.Quantity;
+
+                            while (remainingQuantity >= promotion.Quantity)
+                            {
+                                total += promotion.Price;
+                                remainingQuantity -= promotion.Quantity;
+                            }
+
+                            total += remainingQuantity * orderDetail.StockKeepingUnit.UnitPrice;
                             orderDetail.IsPromotionApplied = true;
-                            total += promotion.Price;
                         }
                     }
                 }

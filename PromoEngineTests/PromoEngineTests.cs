@@ -49,5 +49,35 @@ namespace PromoEngineTests
             decimal invoiceAmount = _engine.CalculateInvoiceAmount(order, new List<Promotion> { promotion });
             Assert.Equal(130, invoiceAmount);
         }
+
+        [Fact]
+        public void OrderWithOrderDetailsQuantityBasedPromotionAppliesMultipleTimes_ReturnsPromotionAmount()
+        {
+            Order order = new Order(1, new List<OrderDetail>()
+            {
+                new(quantity: 3, new StockKeepingUnit("A", 50)),
+                new(quantity: 2, new StockKeepingUnit("B", 30))
+            });
+            Promotion promotion1 = new Promotion(1, PromotionType.Quantity, new List<string> { "A" }, 3, 130);
+            Promotion promotion2 = new Promotion(1, PromotionType.Quantity, new List<string> { "B" }, 2, 45);
+
+            decimal invoiceAmount = _engine.CalculateInvoiceAmount(order, new List<Promotion> { promotion1, promotion2 });
+            Assert.Equal(175, invoiceAmount);
+        }
+
+        [Fact]
+        public void OrderWithOrderDetails_QuantityBasedPromotionAppliesMultipleTimes_WithResidualQuantity_ReturnsPromotionAmount()
+        {
+            Order order = new Order(1, new List<OrderDetail>()
+            {
+                new(quantity: 5, new StockKeepingUnit("A", 50)),
+                new(quantity: 5, new StockKeepingUnit("B", 30))
+            });
+            Promotion promotion1 = new Promotion(1, PromotionType.Quantity, new List<string> { "A" }, 3, 130);
+            Promotion promotion2 = new Promotion(1, PromotionType.Quantity, new List<string> { "B" }, 2, 45);
+
+            decimal invoiceAmount = _engine.CalculateInvoiceAmount(order, new List<Promotion> { promotion1, promotion2 });
+            Assert.Equal(350, invoiceAmount);
+        }
     }
 }
