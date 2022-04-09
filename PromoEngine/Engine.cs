@@ -38,15 +38,19 @@ public class Engine
                 }
                 else if (promotion.Type == PromotionType.Combination)
                 {
-                    List<OrderDetail> applicableOrderDetails = order.OrderDetails.Where(x => promotion.StockKeepingUnitIds.Contains(x.StockKeepingUnit.Id)).ToList();
-                    int promotionApplicableTimes = applicableOrderDetails.Min(x => x.Quantity);
-                    applicableOrderDetails.ForEach(x =>
+                    if (promotion.StockKeepingUnitIds.All(pSkuId =>
+                            order.OrderDetails.Select(oi => oi.StockKeepingUnit.Id).Contains(pSkuId)))
                     {
-                        //x.IsPromotionApplied = true;
-                        x.Quantity -= promotionApplicableTimes;
-                    });
+                        List<OrderDetail> applicableOrderDetails = order.OrderDetails.Where(x => promotion.StockKeepingUnitIds.Contains(x.StockKeepingUnit.Id)).ToList();
+                        int promotionApplicableTimes = applicableOrderDetails.Min(x => x.Quantity);
+                        applicableOrderDetails.ForEach(x =>
+                        {
+                            //x.IsPromotionApplied = true;
+                            x.Quantity -= promotionApplicableTimes;
+                        });
 
-                    total += promotionApplicableTimes * promotion.Price;
+                        total += promotionApplicableTimes * promotion.Price;
+                    }
                 }
             }
 
